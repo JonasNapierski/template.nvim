@@ -59,7 +59,8 @@ local function select_template(opts, callback)
                 local selected_entry = action_state.get_selected_entry()
                 actions.close(prompt_bufnr)
                 if callback then
-                    callback(selected_entry[1]) -- Call the callback with the selected template
+                    -- Call the callback with the selected template
+                    callback(selected_entry[1])
                 end
             end)
             return true
