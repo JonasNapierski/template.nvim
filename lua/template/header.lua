@@ -23,12 +23,12 @@ function header_parse(template_content)
     end
 
     local header_lines = split(template_content, '\n')
-    local line_num = table.getn(header_lines)
 
-    if line_num < 3 then
+    if not header_lines < 3 then
         return {}
     end
 
+    local header = {}
     local starting_header = false
     local current_header = ''
     for _, value in pairs(header_lines) do
@@ -42,12 +42,15 @@ function header_parse(template_content)
 
         if starting_header then
             print("haeder started")
-            if (string.find(value, "%s*&-%s.*")) then
-               print("Field")
+            if (string.find(value, "^%s*&-%s.*")) then
+                print("Field")
                 -- TODO: add to field if field is set
                 if current_header == '' then
                     -- TODO: filter out none field objects.
 
+                else
+                    local tag_name = string.gsub(value, "^%s*&-%s.*", "%1")
+                    header[current_header].insert(tag_name)
                 end
             else
                 -- TODO: parse field name and add it to table
