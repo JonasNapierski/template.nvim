@@ -1,3 +1,5 @@
+i = require('inspect')
+
 local function split(pString, pPattern)
    local Table = {}
    local fpat = "(.-)" .. pPattern
@@ -24,7 +26,7 @@ function header_parse(template_content)
 
     local header_lines = split(template_content, '\n')
 
-    if not header_lines < 3 then
+    if not header_lines then
         return {}
     end
 
@@ -32,37 +34,54 @@ function header_parse(template_content)
     local starting_header = false
     local current_header = ''
     for _, value in pairs(header_lines) do
-        if (string.find(value, "^%-%-%-+")) then
-            starting_header = not starting_header
-
-            if not starting_header then
-                -- break
-            end
-        end
 
         if starting_header then
-            print("haeder started")
-            if (string.find(value, "^%s*&-%s.*")) then
-                print("Field")
-                -- TODO: add to field if field is set
+            if (string.find(value, "^%s*%-%s.*")) then
                 if current_header == '' then
-                    -- TODO: filter out none field objects.
+                    current_header = 'global'
 
-                else
-                    local tag_name = string.gsub(value, "^%s*&-%s.*", "%1")
-                    header[current_header].insert(tag_name)
+                    if header[current_header] == nil then
+                        header[current_header] = {}
+                    end
+                end
+
+                local has_tag, _, tag_name = string.find(value, "^%s*%-%s(.*)")
+
+
+                if has_tag then
+                    print(i.inspect(header[current_header]))
+                    print(tag_name)
+                    table.insert(header[current_header], tag_name)
                 end
             else
-                -- TODO: parse field name and add it to table
+                if current_header == '' then
+                    local has_field_name, _, header_field_name = string.find(value, ".*:")
+
+                    if has_field_name then
+                        current_header = 'global'
+                    else
+                        current_header =header_field_name
+                    end
+
+                    if header[current_header] == nil then
+                        header[current_header] = {}
+                    end
+                end
             end
 
+        end
+
+        if (string.find(value, "^%-%-%-+")) then
+            starting_header = not starting_header
         end
     end
 
-    return header_lines
+    return header
 end
 
 
-local t = header_parse "---\ntags\n- hello\n---"
--- local t = header_parse "---\ntags\n- hello\n---"
-print(table.getn(t))
+local t = header_parse "---\ntags:\n- hello\n---"
+--local t = header_parse "---\n- hello\n---"
+local i = require('inspect')
+-- local t = header_parse "---\ntags:\n- hello\n---"
+print(i.inspect(t))
