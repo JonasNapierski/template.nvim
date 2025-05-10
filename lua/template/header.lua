@@ -1,5 +1,3 @@
-i = require('inspect')
-
 local function split(pString, pPattern)
    local Table = {}
    local fpat = "(.-)" .. pPattern
@@ -78,10 +76,3 @@ function header_parse(template_content)
 
     return header
 end
-
-
-local t = header_parse "---\ntags:\n- hello\n---"
---local t = header_parse "---\n- hello\n---"
-local i = require('inspect')
--- local t = header_parse "---\ntags:\n- hello\n---"
-print(i.inspect(t))
