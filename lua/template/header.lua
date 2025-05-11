@@ -1,28 +1,12 @@
-local function split(pString, pPattern)
-   local Table = {}
-   local fpat = "(.-)" .. pPattern
-   local last_end = 1
-   local s, e, cap = pString:find(fpat, 1)
-   while s do
-      if s ~= 1 or cap ~= "" then
-     table.insert(Table,cap)
-      end
-      last_end = e+1
-      s, e, cap = pString:find(fpat, last_end)
-   end
-   if last_end <= #pString then
-      cap = pString:sub(last_end)
-      table.insert(Table, cap)
-   end
-   return Table
-end
+local util = require "template.util"
 
-function header_parse(template_content)
+local M = {}
+function M.header_parse(template_content)
     if not template_content then
         return {}
     end
 
-    local header_lines = split(template_content, '\n')
+    local header_lines = util.split(template_content, '\n')
 
     if not header_lines then
         return {}
@@ -45,10 +29,7 @@ function header_parse(template_content)
 
                 local has_tag, _, tag_name = string.find(value, "^%s*%-%s(.*)")
 
-
                 if has_tag then
-                    print(i.inspect(header[current_header]))
-                    print(tag_name)
                     table.insert(header[current_header], tag_name)
                 end
             else
@@ -71,8 +52,16 @@ function header_parse(template_content)
 
         if (string.find(value, "^%-%-%-+")) then
             starting_header = not starting_header
+
+            if not starting_header then
+                break
+                -- after the second time the atleast three dashes are detected the header will be stopped parsing.
+            end
         end
     end
 
     return header
 end
+
+
+return M
