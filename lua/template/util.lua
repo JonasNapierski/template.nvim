@@ -1,4 +1,6 @@
-function split(pString, pPattern)
+local util = {}
+
+function util.split(pString, pPattern)
    local Table = {}
    local fpat = "(.-)" .. pPattern
    local last_end = 1
@@ -16,3 +18,6 @@ function split(pString, pPattern)
    end
    return Table
 end
+
+
+return util

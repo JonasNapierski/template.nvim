@@ -5,16 +5,26 @@ local conf = require("telescope.config").values
 local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
 
-local template = {}
+local template = {
+    template_folder = nil
+}
 
-local function get_templates_from_folder(folder_path)
+function template.get_templates(folder_path)
+    if not folder_path then
+        folder_path = template.template_folder
+    end
+
     local templates = {}
     local handle = vim.loop.fs_scandir(vim.fn.expand(folder_path))
 
     if handle then
         while true do
             local name, type = vim.loop.fs_scandir_next(handle)
-            if not name then break end
+
+            if not name then
+                break
+            end
+
             if type == "file" then
                 table.insert(templates, name)
             end
@@ -26,13 +36,24 @@ local function get_templates_from_folder(folder_path)
     return templates
 end
 
+
+function template.get_template_folder()
+	return template.template_folder
+end
+
 function template.select_template(opts, callback)
     opts = opts or {}
+
+    if not opts.template_folder then
+        print "Template folder not set correctly."
+        return
+    end
+    local templates = template.get_templates(opts.template_folder)
 
     pickers.new(opts, {
         prompt_title = "File Template",
         finder = finders.new_table {
-            results = get_templates_from_folder(opts.template_folder)
+            results = templates
         },
 
         sorter = conf.generic_sorter(opts),
@@ -51,7 +72,8 @@ function template.select_template(opts, callback)
 end
 
 function template.read_template(template_name)
-    local template_path = vim.fn.expand(M.opts.template_folder .. "/" .. template_name)
+
+    local template_path = vim.fn.expand(template.template_folder .. "/" .. template_name)
 
     if vim.fn.filereadable(template_path) == 1 then
         return vim.fn.readfile(template_path)
@@ -66,7 +88,7 @@ local function create_or_overwrite_file(file_name, template_name)
         return
     end
 
-    local template_content = template.read_template(read_template)
+    local template_content = template.read_template(template_name)
     local file_path = vim.fn.expand(file_name)
 
     if template_content then
